@@ -43,3 +43,6 @@ env/
 .genreleases/
 *.zip
 sdd-*/
+
+# Ignore patent data folder and its contents
+/IG_start/data/

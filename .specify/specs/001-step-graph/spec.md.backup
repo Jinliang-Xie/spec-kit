@@ -1,0 +1,132 @@
+# Feature Specification: Step Graph from Patent Text (LLM-integrated Python workflow)
+
+Feature Branch: `001-step-graph`
+Created: 2025-10-28
+Status: Draft
+Input: User description: "将 LLM 集成到 Python 工作流中，从专利说明书萃取文本中提取与刻画工步图谱；分阶段在 Neo4j 可视化，并最终跨文档聚合为可复用工步集合。"
+
+References:
+- Constitution (canonical EN): `.specify/memory/constitution.en.md`
+- Chinese counterpart: `.specify/memory/constitution.md`
+- Sample data (outside repo for now): Example patent JSONs and CSV provided by user
+
+## 1. Scope and staged deliverables (aligned with Constitution)
+
+Stage-1: Step Identification (per-patent)
+- Extract atomic candidate steps (initial pass) from patent JSON/text with fields: inputs/outputs, device, mode, conditions (env/params), relations (sequence/parallel).
+- Deliverable: Neo4j graph per patent with Patent, Step, preliminary relations.
+
+Stage-2: Step Encoding (Unified Characterization)
+- Map each step onto three dimensions: Energy, Matter(transport/reaction), Information (acquisition/processing). Allow multi-valued before atomicization.
+- Deliverable: Neo4j augmentation with Dimension nodes and HAS_DIMENSION edges; second visualization.
+
+Stage-3: Step Atomicization (Splitting/Refinement)
+- Split composite steps (multi-valued or composite actions/conditions) into atomic steps; preserve order/parallel semantics and provenance.
+- Deliverable: Atomic Step set, DERIVED_FROM/COMPOSED_OF provenance; third visualization.
+
+Stage-4: Clustering/Canonicalization (Cross-document)
+- Cluster or mark SAME_AS for similar atomic steps to form reusable canonical steps; merge duplicates.
+- Deliverable: Cross-patent aggregated graph; fourth visualization.
+
+Out of scope (for this spec): UI productization, auth/perm systems; algorithm thresholds are defined in plan/ADR, not here.
+
+## 2. User Scenarios & Testing
+
+User Story 1 - Inspect a single patent process (P1)
+- As an analyst, I load one patent JSON and generate Stage-1/2/3 graphs; I can query steps, parameters, and relations in Neo4j Browser.
+Why priority: Foundation for further stages; usable MVP.
+Independent Test: Run pipeline on one JSON; verify nodes/edges counts and sample correctness.
+Acceptance:
+1. Given a valid patent JSON, When I run stage-1..3, Then I can see Patent→HAS_STEP→Step; PRECEDES/parallel; HAS_PARAM and HAS_DIMENSION present.
+2. Given a step with multi-valued dimensions, When atomicization runs, Then composite steps are replaced by atomic ones with DERIVED_FROM links.
+
+User Story 2 - Compare steps across two patents (P2)
+- As an analyst, I load two patents and visualize shared canonical steps.
+Independent Test: Two JSONs produce cluster/SAME_AS links across docs.
+Acceptance: SAME_AS or IN_CLUSTER edges created, duplicates reduced.
+
+User Story 3 - Trace provenance (P2)
+- As an auditor, I need to trace any atomic step back to original text snippet and parameter raw values/units.
+Acceptance: Each Parameter stores raw_text/raw_value and normalized_value/unit; edges store evidence_ref.
+
+Edge Cases
+- Missing units or ambiguous ranges
+- Parallel vs sequential disambiguation
+- Extremely long composite steps creating split explosion
+- Conflicting values in different sections
+
+## 3. Functional Requirements
+
+FR-001: The system MUST support staged execution (stage-1..4) with independent runs and persisted artifacts per stage.
+FR-002: The system MUST ingest patent JSON and/or raw text with minimal contract (doc_id, blocks with text and meta, language, timestamps).
+FR-003: The system MUST extract Step entities with fields: step_id, source_ref, text_snippet, inputs/outputs (optional), device, mode, conditions (parameters), and relations.
+FR-004: The system MUST encode steps along Energy/Matter/Information dimensions and attach HAS_DIMENSION edges to Dimension nodes.
+FR-005: The system MUST perform atomicization to split composite steps into atomic steps and record DERIVED_FROM/COMPOSED_OF.
+FR-006: The system MUST attach environmental/operational Parameters (temperature, pressure, time, atmosphere, rpm, flow, concentration, etc.) with HAS_PARAM edges.
+FR-007: The system MUST write to Neo4j using idempotent upserts (MERGE) with batch/version tagging and support rollback by batch/version.
+FR-008: The system MUST support cross-document clustering/canonicalization, creating SAME_AS or IN_CLUSTER links (without losing provenance).
+FR-009: The system MUST record provenance for all derived data: prompt/model/params version, normalization_rules_version, source_ref, raw_text/raw_value.
+FR-010: The system MUST be modular and operable from VS Code terminal; stage outputs are saved under a project folder after user confirmation.
+
+NEEDS CLARIFICATION:
+- FR-011: Minimal JSON input contract fields beyond doc_id and blocks (e.g., title, pub_date, section types, language, figure refs) [clarify]
+- FR-012: Parallel relation representation (use PARALLEL_WITH or infer by same layer) [clarify]
+- FR-013: Dimension taxonomy initial list and expansion process [clarify]
+- FR-014: Explosion control limits during atomicization (max splits, heuristics) [clarify]
+
+## 4. Key Entities (technology-agnostic)
+
+Patent: id, title (opt), pub_date (opt), source_ref
+Step: step_id, atomic_flag, source_ref, text_snippet (opt)
+Dimension: name, subtype (optional hierarchy), description
+Parameter: name, value (scalar/range/set+qualifier), unit (normalized), raw_text, raw_value, unit_original, method, confidence, normalization_rules_version, source_ref
+Cluster/CanonicalStep: id, label, centroid (conceptual)
+
+Relations:
+HAS_STEP (Patent→Step)
+PRECEDES/NEXT (Step→Step)
+HAS_DIMENSION (Step→Dimension)
+HAS_PARAM (Step→Parameter)
+DERIVED_FROM/COMPOSED_OF (Step↔Step)
+SAME_AS/IN_CLUSTER (Step→Cluster/CanonicalStep)
+
+## 5. Input/Output Contracts (principle-level)
+
+Input (patent JSON minimal):
+- doc_id: string
+- blocks: [ { id, text, section_type?, page?, lang?, meta? } ]
+- optional: title, pub_date, ipc/cpc, figures
+
+Output (Neo4j):
+- Nodes: Patent, Step, Dimension, Parameter, Cluster/CanonicalStep
+- Edges: HAS_STEP, PRECEDES/NEXT, HAS_DIMENSION, HAS_PARAM, DERIVED_FROM/COMPOSED_OF, SAME_AS/IN_CLUSTER
+- Persisted artifacts per stage: structured JSON snapshots and logs in `.artifacts/<stage>/<doc_id>/`
+
+## 6. Success Criteria (measurable but tech-agnostic)
+
+SC-001: Stage-1..3 complete without errors on a sample set; each stage produces queryable graph and stored artifacts.
+SC-002: ≥95% of Parameters have normalized units with raw_text/raw_value preserved.
+SC-003: Atomicization reduces composite steps with no loss of provenance; reviewers can trace back to source.
+SC-004: Cross-document clustering yields a non-empty canonical set with duplicates reduced (qualitative review acceptable in first pass).
+
+## 7. Non-Goals / Constraints
+
+- No productized UI or auth system in this iteration.
+- LLM integration via CLI-first in Python environment; API fallback allowed but must respect same contracts.
+- No hard-coding of algorithms or thresholds here; those live in plan/ADR.
+
+## 8. Open Questions / Clarifications Needed
+
+- Parameter dictionary v0: controlled names and normalized units? Who owns it and how to extend?
+- Atomicization guardrails: max splits, heuristics, and marking partial atomicization when ambiguous?
+- Parallel semantics: explicit PARALLEL_WITH vs. layered ordering representation?
+- Dimension taxonomy: initial sub-dimensions list and the governance for changes?
+- Caching/logging: default locations and retention for CLI calls, and cache-bypass policy?
+
+## 9. Acceptance Checklist (for spec sign-off)
+
+- [ ] Stages and deliverables match Constitution
+- [ ] Entities and relations cover Patent/Step/Dimension/Parameter/Cluster + required edges
+- [ ] Input/Output contract (principle-level) captured
+- [ ] Non-goals and constraints captured
+- [ ] Open questions enumerated for /speckit.clarify and plan

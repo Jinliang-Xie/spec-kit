@@ -59,13 +59,13 @@ README.md
    [project]
    name = "step-graph"
    version = "0.1.0"
-   requires-python = ">=3.11"
+   requires-python = ">=3.12"
    dependencies = [
-       "click>=8.0",
+       "click>=8.3.0",
    ]
    
    [project.optional-dependencies]
-   neo4j = ["neo4j>=5.14"]
+   neo4j = ["neo4j>=5.0"]
    
    [project.scripts]
    step-graph = "step_graph.__main__:cli"
@@ -195,7 +195,7 @@ def cli():
 @cli.command()
 def check():
     """Check environment and dependencies."""
-    click.echo("✓ Python 3.11+ detected")
+    click.echo("✓ Python 3.12+ detected")
     
     neo4j_uri = get_neo4j_uri()
     if neo4j_uri:
@@ -1447,7 +1447,7 @@ python -m step_graph rollback --run-id test-run-1 --yes
 
 **Verification**:
 - README is clear and concise
-- Installation works on fresh Python 3.11+ environment
+- Installation works on fresh Python 3.12+ environment
 
 ---
 

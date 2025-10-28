@@ -19,18 +19,20 @@ This guide shows how to extract patent step graphs using a **human-in-the-loop w
 ### System Requirements
 
 - **Operating System**: macOS, Linux, or Windows with WSL2
-- **Python**: 3.11 or higher
-- **Neo4j**: 5.x (Desktop recommended for researchers)
+## Prerequisites
+
+- **Python**: 3.12 or higher
+- **Neo4j**: 5.x (optional - for visualization only)
 - **VS Code**: With GitHub Copilot enabled
 - **Memory**: Minimum 8GB RAM
 - **Storage**: ~2GB free space for artifacts
 
 ### Required Software
 
-1. **Python 3.11+**
+1. **Python 3.12+**
+
    ```bash
-   python --version  # Should show 3.11 or higher
-   ```
+   python --version  # Should show 3.12 or higher
 
 2. **Neo4j 5.x**
    - **Recommended for researchers**: Neo4j Desktop
@@ -39,15 +41,12 @@ This guide shows how to extract patent step graphs using a **human-in-the-loop w
      - Easier visualization with built-in browser
    
    - **Alternative - Docker**:
-     ```bash
-     docker run -d \
-       --name neo4j-step-graph \
-       -p 7474:7474 -p 7687:7687 \
-       -e NEO4J_AUTH=neo4j/password123 \
-       neo4j:5.14-community
-     ```
-
-3. **VS Code with GitHub Copilot**
+   ```bash
+   docker run -d \
+     --name neo4j-step-graph \
+     -p 7474:7474 -p 7687:7687 \
+     -e NEO4J_AUTH=neo4j/password \
+     neo4j:5-community3. **VS Code with GitHub Copilot**
    - Install VS Code: https://code.visualstudio.com/
    - Enable GitHub Copilot extension
    - **No API keys needed** - Copilot handles LLM calls

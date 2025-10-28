@@ -25,17 +25,17 @@ You are building a **human-in-the-loop patent analysis pipeline** with four prog
 
 ## Technical Stack
 
-**Language**: Python 3.11+  
-**CLI Framework**: Click 8.x  
-**Database**: Neo4j 5.14+ (optional - for visualization only)  
+**Language**: Python 3.12+ (current environment: Python 3.12.10)  
+**CLI Framework**: Click 8.3.x (latest stable: [8.3.0](https://click.palletsprojects.com/en/stable/))  
+**Database**: Neo4j 5.x (optional - for visualization only, docs: [neo4j.com/docs](https://neo4j.com/docs/))  
 **Testing**: pytest with >60% coverage for parsers/utils  
 **Development**: VS Code + GitHub Copilot  
 **Dependencies**:
 ```toml
 [tool.poetry.dependencies]
-python = "^3.11"
-click = "^8.1.0"
-neo4j = {version = "^5.14.0", optional = true}
+python = "^3.12"
+click = "^8.3.0"
+neo4j = {version = "^5.0.0", optional = true}
 pydantic = {version = "^2.0.0", optional = true}
 
 [tool.poetry.dev-dependencies]
@@ -751,14 +751,14 @@ Extract, characterize, atomize, and cluster technical steps from patent JSON dat
 git clone <repo_url>
 cd step_graph
 
-# Install with Poetry
+# Install with Poetry (recommended)
 poetry install
 
 # Or with pip
-pip install -e .
+pip3 install -e .
 
-# Setup Neo4j (optional)
-docker run -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/password neo4j:5.14
+# Setup Neo4j (optional) - using latest 5.x
+docker run -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/password neo4j:5-community
 
 # Configure
 cp .env.example .env

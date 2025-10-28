@@ -21,10 +21,10 @@ Build a modular Python pipeline that extracts, characterizes, atomizes, and clus
 
 ## Technical Context
 
-**Language/Version**: Python 3.11+  
+**Language/Version**: Python 3.12+ (current environment: Python 3.12.10)  
 **Primary Dependencies**: 
 - **Neo4j Python Driver** (5.x): Graph database integration (optional - for visualization)
-- **Click**: CLI framework
+- **Click** (8.3.x): CLI framework
 - **Pydantic** (v2, optional): Data validation if needed
 - **GitHub Copilot / Codex**: LLM assistance via IDE integration (no API calls)
 
@@ -333,7 +333,7 @@ Structure:
 
 **Contents**:
 - **Prerequisites**
-  - Python 3.11+ installation
+  - Python 3.12+ installation
   - Neo4j 5.x setup (optional - for visualization only)
   - VS Code with GitHub Copilot or Codex enabled
   - No API keys needed (Copilot handles LLM)

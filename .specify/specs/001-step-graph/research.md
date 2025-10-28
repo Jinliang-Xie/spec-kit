@@ -35,7 +35,7 @@ docker run -d \
   --name neo4j-step-graph \
   -p 7474:7474 -p 7687:7687 \
   -e NEO4J_AUTH=neo4j/password123 \
-  neo4j:5.14-community
+  neo4j:5-community
 ```
 - **Status**: ✅ Tested successfully
 
@@ -296,8 +296,8 @@ Based on manual analysis of 20 sample steps:
 
 | Package | Version | Purpose | Status |
 |---------|---------|---------|--------|
-| Python | 3.11+ | Runtime | ✅ Standard |
-| neo4j | 5.14+ | Graph driver (optional) | ✅ Tested (can defer) |
+| Python | 3.12+ | Runtime | ✅ Standard |
+| neo4j | 5.x | Graph driver (optional) | ✅ Tested (can defer) |
 | click | 8.x | CLI framework | ✅ Simple |
 | pydantic | 2.x | Data validation (optional) | ⚠️ May skip for MVP |
 

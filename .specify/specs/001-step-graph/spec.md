@@ -441,7 +441,7 @@ Notes: The following Open Questions were resolved by stakeholder clarifications 
 
 ### Constraints
 
-- Python 3.11+ required.
+- Python 3.12+ required.
 - Neo4j 5.x required for constraint syntax and indexing features.
 - LLM quota limits may throttle processing; caching mitigates repeat calls.
 - Initial focus: battery/electrochemistry domain patents (can generalize later).
